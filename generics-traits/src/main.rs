@@ -17,13 +17,27 @@ trait MyIterator {
         }
     }
 
-    // fn my_map(self, mapper: ?) -> MyMap {
-    //     todo!()
-    // }
+    fn my_map<M, V>(self, mapper: M) -> MyMap<Self, M>
+    where
+        M: Fn(Self::Item) -> V,
+        Self: Sized,
+    {
+        MyMap {
+            iterator: self,
+            mapper,
+        }
+    }
 
-    // fn my_sum(mut self) -> i32 {
-    //     todo!()
-    // }
+    fn my_sum(mut self) -> i32
+    where
+        Self: MyIterator<Item = i32> + Sized,
+    {
+        let mut sum = 0;
+        while let Some(item) = self.next() {
+            sum += item;
+        }
+        sum
+    }
 }
 
 impl<T> MyIterator for Vec<T> {
@@ -56,7 +70,21 @@ where
     }
 }
 
+impl<I, M, V> MyIterator for MyMap<I, M>
+where
+    I: MyIterator,
+    M: Fn(I::Item) -> V,
+{
+    type Item = V;
 
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(value) = self.iterator.next() {
+            Some((self.mapper)(value))
+        } else {
+            None
+        }
+    }
+}
 struct MyFilter<I, P> {
     iterator: I,
     predicate: P,
@@ -73,7 +101,6 @@ fn print_iterator<T: Display>(mut iterator: impl MyIterator<Item = T>) {
     while let Some(item) = iterator.next() {
         println!("{item}");
     }
-
 }
 
 fn main() {
