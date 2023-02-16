@@ -6,12 +6,16 @@ trait MyIterator {
     fn next(&mut self) -> Option<Self::Item>;
 
     // Replace ? with correct Generic type parameters
-    // fn my_filter<?>(self, predicate: ?) -> MyFilter<?, ?> {
-    //     MyFilter {
-    //         iterator: self,
-    //         predicate,
-    //     }
-    // }
+    fn my_filter<P>(self, predicate: P) -> MyFilter<Self, P>
+    where
+        P: Fn(&Self::Item) -> bool,
+        Self: Sized,
+    {
+        MyFilter {
+            iterator: self,
+            predicate,
+        }
+    }
 
     // fn my_map(self, mapper: ?) -> MyMap {
     //     todo!()
@@ -34,6 +38,25 @@ impl<T> MyIterator for Vec<T> {
     }
 }
 
+impl<I, P> MyIterator for MyFilter<I, P>
+where
+    I: MyIterator,
+    P: Fn(&I::Item) -> bool,
+{
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(item) = self.iterator.next() {
+            if (self.predicate)(&item) {
+                return Some(item);
+            }
+        }
+
+        None
+    }
+}
+
+
 struct MyFilter<I, P> {
     iterator: I,
     predicate: P,
@@ -41,7 +64,7 @@ struct MyFilter<I, P> {
 
 struct MyMap<I, M> {
     iterator: I,
-    mapper: M
+    mapper: M,
 }
 
 fn print_iterator<T: Display>(mut iterator: impl MyIterator<Item = T>) {
