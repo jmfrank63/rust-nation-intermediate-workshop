@@ -70,15 +70,18 @@ struct MyMap<I, M> {
 fn print_iterator<T: Display>(mut iterator: impl MyIterator<Item = T>) {
     // Remember that MyIterator is not integrated to Rust
     // you will not be able to use `for elt in iterator {`
-    todo!()
+    while let Some(item) = iterator.next() {
+        println!("{item}");
+    }
+
 }
 
 fn main() {
     let enumeration = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     print_iterator(enumeration.clone());
 
-    // let filtered = enumeration.clone().my_filter(|&item| item % 2 == 0);
-    // print_iterator(filtered);
+    let filtered = enumeration.clone().my_filter(|&item| item % 2 == 0);
+    print_iterator(filtered);
 
     // let mapped = enumeration.clone().my_map(|item| format!("Value: {}", item));
     // print_iterator(mapped);
