@@ -1,0 +1,2 @@
+[workspace]
+members = ["generics-traits", "threads", "macros", "web-assembly", "bonus_trait_objects"]
